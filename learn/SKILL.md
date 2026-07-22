@@ -48,7 +48,7 @@ Before proposing anything, check existing skills in both locations:
 
 **Global skills** (applies across all projects):
 ```
-C:\Users\marce\.copilot\skills\
+~/.copilot/skills/
 ```
 
 **Project skills** (for current workspace):
@@ -64,7 +64,7 @@ Use `list_dir` to enumerate folders, then read the `description` field of each `
 
 | Scope | Location | Use When |
 |-------|----------|----------|
-| **Global** | `C:\Users\marce\.copilot\skills\<domain>\` | Framework knowledge, language patterns, tool usage, debugging techniques, general architecture concepts — applicable across multiple projects |
+| **Global** | `~/.copilot/skills/<domain>/` | Framework knowledge, language patterns, tool usage, debugging techniques, general architecture concepts — applicable across multiple projects |
 | **Project** | `<workspace-root>\.github\skills\<domain>\` | Current project architecture, data models, service patterns, coding conventions, flows unique to this codebase |
 
 If in doubt, prefer **project scope** — it avoids polluting global knowledge with context that only makes sense for one project.
