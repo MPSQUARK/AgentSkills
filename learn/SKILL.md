@@ -157,11 +157,11 @@ description: 'Use when: <specific trigger phrases — what situation warrants lo
 |------------|---------|
 | Format | Lowercase, hyphen-separated |
 | Granularity | Domain/framework/layer level — not per-fact |
-| Scope prefix | For project skills: prefix with project name if ambiguity possible, e.g. `blindit-architecture` |
+| Scope prefix | For project skills: prefix with project name if ambiguity possible, e.g. `projectname-architecture` |
 
 **Global examples**: `maui-navigation`, `signalr-hubs`, `dotnet-patterns`, `maui-controls`, `csharp-async`
 
-**Project examples**: `blindit-architecture`, `blindit-data-models`, `blindit-game-flow`, `blindit-server-hubs`
+**Project examples**: `projectname-architecture`, `projectname-data-models`, `projectname-game-flow`, `projectname-server-hubs`
 
 **Anti-patterns**: `reconnection-fix`, `my-notes`, `misc`, `todo` — too narrow or non-descriptive
 

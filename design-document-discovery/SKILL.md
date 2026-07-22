@@ -36,7 +36,7 @@ Build authoritative domain specifications by aligning user vision with current i
 
 **Order of use:** `design-document-discovery` establishes domain truth; `clarify-requirements` scopes individual features against it.
 
-**Worked example:** BlindIt → `Documentation/GameSpecification.md`
+**Worked example:** ProjectName → `Documentation/GameSpecification.md`
 
 ---
 
