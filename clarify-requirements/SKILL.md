@@ -5,7 +5,18 @@ description: 'ALWAYS invoke at the start of the planning phase before any plan o
 
 # clarify-requirements
 
-Instructions for the AI agent...
+Structured alignment for a **single feature or change** before any plan or implementation. Produces a session-scoped specification; for full domain/system documentation, use `design-document-discovery` first.
+
+## Relationship to design-document-discovery
+
+| Skill | Scope | Output | When |
+|---|---|---|---|
+| `design-document-discovery` | Full domain / system | Domain spec in discovered docs path | Exhaustive vision-vs-code alignment |
+| `clarify-requirements` | Single feature / change | `/memories/session/plan.md` | Before implementing one task |
+
+**Order of use:** `design-document-discovery` establishes domain truth; `clarify-requirements` scopes individual features against it. Each feature plan should link to the relevant domain spec sections.
+
+Teams without Cursor memories may use an equivalent session plan path if the user specifies (e.g. `docs/plans/{feature}.md`).
 
 ## When to Use
 
@@ -35,6 +46,8 @@ Read the feature/task description carefully. Briefly (2–4 sentences) acknowled
 
 ### Step 2 — Proportional Codebase Check
 
+**Domain spec first:** If a domain spec exists (from `design-document-discovery` or repo doc discovery — e.g. `docs/specs/`, `Documentation/`, `ARCHITECTURE*`), read the relevant sections before asking questions. Do not re-ask what the domain spec already answers; reference it in the plan instead.
+
 Decide how much codebase investigation is warranted based on the scale and complexity of the change:
 
 - **Simple / localized change** (e.g., rename a label, fix a typo, change a colour): Skip or minimise this step. Do not slow the user down by surfacing irrelevant context.
@@ -43,6 +56,7 @@ Decide how much codebase investigation is warranted based on the scale and compl
   - Relevant existing files, patterns, and naming conventions
   - Current implementation of anything this change touches
   - Anything in the codebase that constrains or informs the design
+  - Relevant domain spec sections already covering this area
 
 Surface only findings that directly affect the questions or decisions ahead.
 
@@ -95,6 +109,10 @@ Only when **all** questions are fully resolved, write a structured specification
 
 ## Summary
 [2–4 sentence description of what is being built and why.]
+
+## Domain Spec Reference
+- Spec: [path/to/domain-spec.md] (or "N/A — no domain spec yet")
+- Relevant sections: [section numbers/names]
 
 ## Functional Requirements
 [Numbered list of concrete, testable requirements.]

@@ -1,13 +1,13 @@
 ---
 name: learn
-description: 'Capture, update, and organize durable knowledge as Copilot skills for reuse across sessions. Use when: recording project architecture decisions, saving framework quirks or non-obvious behaviors, preserving debugging findings, capturing coding conventions and patterns, reducing repeated explanations, building context for future agents. Also invoke when: a mistake was corrected by the user, a concept had to be explained more than once, a non-obvious workaround was discovered, or an established pattern was confirmed. DO NOT write any file without explicit user approval.'
+description: 'Capture, update, and organize durable knowledge as agent skills for reuse across sessions. Use when: recording project architecture decisions, saving framework quirks or non-obvious behaviors, preserving debugging findings, capturing coding conventions and patterns, reducing repeated explanations, building context for future agents. Also invoke when: a mistake was corrected by the user, a concept had to be explained more than once, a non-obvious workaround was discovered, or an established pattern was confirmed. DO NOT write any file without explicit user approval.'
 ---
 
-# learn — Copilot Long-Term Knowledge System
+# learn — Agent Long-Term Knowledge System
 
 ## Purpose
 
-This skill captures curated, durable knowledge as Copilot skill files so future agents — and agents whose context window has been compacted — can load relevant knowledge on demand without requiring the user to repeat themselves. It is the long-term memory layer of the system.
+This skill captures curated, durable knowledge as agent skill files so future agents — and agents whose context window has been compacted — can load relevant knowledge on demand without requiring the user to repeat themselves. It is the long-term memory layer of the system.
 
 **Relationship to `/memories/`**:
 - `/memories/` → transient working notes, session state, in-progress task context. Session-scoped or short-lived.
@@ -47,14 +47,18 @@ Clearly articulate:
 Before proposing anything, check existing skills in both locations:
 
 **Global skills** (applies across all projects):
-```
-~/.copilot/skills/
-```
+
+| Tool | Paths |
+|---|---|
+| Cursor | `~/.cursor/skills/`, `~/.agents/skills/` |
+| GitHub Copilot | `~/.copilot/skills/` |
 
 **Project skills** (for current workspace):
-```
-<workspace-root>\.github\skills\
-```
+
+| Tool | Paths |
+|---|---|
+| Cursor | `<workspace-root>/.cursor/skills/`, `<workspace-root>/.agents/skills/` |
+| GitHub Copilot | `<workspace-root>/.github/skills/` |
 
 Use `list_dir` to enumerate folders, then read the `description` field of each `SKILL.md` to find candidates.
 
@@ -64,8 +68,10 @@ Use `list_dir` to enumerate folders, then read the `description` field of each `
 
 | Scope | Location | Use When |
 |-------|----------|----------|
-| **Global** | `~/.copilot/skills/<domain>/` | Framework knowledge, language patterns, tool usage, debugging techniques, general architecture concepts — applicable across multiple projects |
-| **Project** | `<workspace-root>\.github\skills\<domain>\` | Current project architecture, data models, service patterns, coding conventions, flows unique to this codebase |
+| **Global (Cursor)** | `~/.cursor/skills/<domain>/` or `~/.agents/skills/<domain>/` | Framework knowledge, language patterns, tool usage — applicable across multiple projects |
+| **Global (Copilot)** | `~/.copilot/skills/<domain>/` | Same as above, for GitHub Copilot |
+| **Project (Cursor)** | `<workspace-root>/.cursor/skills/<domain>/` or `<workspace-root>/.agents/skills/<domain>/` | Current project architecture, conventions, flows unique to this codebase |
+| **Project (Copilot)** | `<workspace-root>/.github/skills/<domain>/` | Same as above, for GitHub Copilot |
 
 If in doubt, prefer **project scope** — it avoids polluting global knowledge with context that only makes sense for one project.
 
@@ -90,7 +96,7 @@ Prepare the exact content to be written:
 
 **Never write any file without explicit user approval.**
 
-Use `vscode_askQuestions` to present:
+Use `AskQuestion` to present:
 1. **Action**: "Create new skill `<name>`" or "Update existing skill `<name>`"
 2. **Location**: Full file path
 3. **Content Preview**: The exact content to be written (full text for new files; exact diff/addition for updates)
@@ -171,12 +177,14 @@ description: 'Use when: <specific trigger phrases — what situation warrants lo
 
 | System | What Goes Here | Lifetime |
 |--------|---------------|----------|
-| `/memories/session/` | In-progress task notes, current plan, temporary context | Current session only |
-| `/memories/repo/` | Quick project facts, build commands, local conventions not worth a full skill | Persistent but informal |
-| `/memories/` (user) | Cross-workspace preferences and patterns | Persistent |
+| `/memories/session/` | In-progress task notes, current plan, temporary context (Cursor) | Current session only |
+| `/memories/repo/` | Quick project facts, build commands, local conventions not worth a full skill (Cursor) | Persistent but informal |
+| `/memories/` (user) | Cross-workspace preferences and patterns (Cursor) | Persistent |
 | **Learn skill outputs** | Curated, structured knowledge for future agent discovery | Permanent, indexed by skill description |
 
 If something is genuinely reusable by a future agent starting cold — it belongs in a knowledge skill, not just memory.
+
+> `/memories/` is a Cursor-specific feature. Teams using other agents may use repo-local equivalents (e.g. `docs/notes/`) at the user's direction.
 
 ---
 
@@ -188,4 +196,4 @@ There are no exceptions to the approval requirement. This applies to:
 - Creating a new reference file within an existing skill
 - Reorganizing, renaming, or deleting any skill file
 
-Always use `vscode_askQuestions` and wait for an explicit approval response before writing.
+Always use `AskQuestion` and wait for an explicit approval response before writing.

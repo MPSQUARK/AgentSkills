@@ -22,7 +22,7 @@ Produce code a senior engineer would approve in production review.
 - Names reveal intent and are searchable — never `data`, `d`, `stuff`, `handleThing`.
 - One word per concept across the codebase (`Get` vs `Fetch` for the same idea — pick one).
 - DRY: extract on second use; centralize shared behavior (helpers, value objects, static renderers).
-- Named constants over magic numbers/strings (`LogicalW`, `GameColors.Blue`, not bare literals).
+- Named constants over magic numbers/strings (`MaxRetryCount`, `ThemeTokens.Primary`, not bare literals).
 - Max nesting depth 3; replace long if/else with named helpers, maps, or strategy objects.
 - **Avoid the `else` keyword** — use guard clauses and early `return`/`continue` so the happy path stays flat and left-aligned.
 - Orchestrator methods delegate (`Draw` → `DrawNodes` → `GetNodeStyle`); they don't implement everything.
