@@ -58,6 +58,8 @@ Decide how much codebase investigation is warranted based on the scale and compl
   - Anything in the codebase that constrains or informs the design
   - Relevant domain spec sections already covering this area
 
+When the change touches an **unfamiliar or performance-critical niche**, skim existing implementations **in that same niche** in the codebase before listing questions.
+
 Surface only findings that directly affect the questions or decisions ahead.
 
 ---
@@ -83,6 +85,14 @@ When the request involves non-trivial design or implementation decisions, also c
 10. **Consequences of design choices** — What side effects does the proposed approach have on other components? What becomes harder to change later?
 11. **Performance concerns** — Any risk of N+1 queries, UI-thread blocking, memory leaks, or excessive allocation?
 12. **Gaps, ambiguities, and edge cases** — What happens in error or boundary conditions? Are there behaviours left underspecified that could cause misalignment during implementation?
+
+When the change touches an **unfamiliar or performance-critical niche**, also consider:
+
+13. **Execution context** — Where does this code run (CPU hot path, background worker, device/accelerator, I/O boundary)? What constraints apply (latency, throughput, memory, parallelism)?
+14. **Unit of work** — What is the natural grain of one operation in this context? What should explicitly *not* be nested or looped inside it?
+15. **Minimal structure** — What is the smallest design that meets requirements? What abstractions are being rejected as unnecessary?
+16. **Project domain docs** — Does this repo have a spec or guide for this niche? (Resolve per project — read it before asking the user to repeat it.)
+17. **Verification boundary** — Where do automated tests belong vs user manual or scratch areas?
 
 > If a question can be answered with confidence by checking the codebase (Step 2), check it first and do not ask the user.
 

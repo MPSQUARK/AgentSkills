@@ -16,6 +16,13 @@ Produce code a senior engineer would approve in production review.
 - Stepdown rule: top of file/method reads as a narrative; details descend below.
 - Prefer small composable units over monolithic functions/classes.
 
+## Fit the execution niche
+
+- Code for one runtime context (UI thread, request handler, batch job, device/accelerator, hot loop) is not interchangeable — identify the niche **before** choosing structure.
+- Read how the **same niche** is already implemented in the codebase (2–3 examples) before introducing new abstractions.
+- The natural unit of work in that niche drives the design — do not serialize work the runtime is meant to parallelize; do not parallelize work that is inherently sequential.
+- Precompute what the hot path should not re-derive on every invocation; pass simple values or structs inward instead of pushing configuration into the inner loop.
+
 ## Structure
 - SOLID: one responsibility per function/class; ~20–30 lines max unless justified.
 - One abstraction level per function — don't mix orchestration with low-level details.
@@ -38,6 +45,8 @@ Produce code a senior engineer would approve in production review.
 - Remove dead properties/code; don't layer workarounds on redundant state.
 - Prefer enriching the canonical model over parallel DTOs.
 - Extract try/catch — don't blend error handling with business logic.
+- Prefer the **smallest** structure that solves the problem; extra layers need explicit justification.
+- If the change touches an unfamiliar niche (concurrency, device code, serialization, real-time paths), read that niche's project docs and existing implementations — do not infer from a different niche's idioms alone.
 
 ## Red flags — refactor before submitting
 - Copy-pasted blocks or scattered low-level primitives (inline canvas/API calls vs shared `Renderer`)
@@ -48,6 +57,11 @@ Produce code a senior engineer would approve in production review.
 - Large files with no section structure
 - Clever/condensed code over readable code
 - Comments explaining *what* code does (rename/refactor instead)
+- Orchestration or dispatch layer is larger or more abstract than the work it performs
+- New abstraction for a one-off, or one that duplicates an existing pattern instead of reusing it
+- Duplicate code paths for the same operation (e.g. separate in-place stack when aliasing the allocating path would suffice)
+- Validation, test harnesses, or tooling added to directories the user treats as manual or scratch space
+- Solution works but would embarrass a specialist in that niche (performance library, real-time system, public API surface, etc.)
 
 ## Output
 - Plan → clean code → short decision summary.
