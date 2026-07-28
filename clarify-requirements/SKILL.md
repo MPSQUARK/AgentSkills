@@ -1,6 +1,6 @@
 ---
 name: clarify-requirements
-description: 'ALWAYS invoke at the start of the planning phase before any plan or implementation begins. Auto-suggest for: complex features, architectural changes, new pages or services, cross-cutting concerns, anything spanning multiple files or systems, any request where intent is ambiguous or scope is unclear. Runs a structured alignment interview — acknowledged what is asked, investigates the codebase proportionally, asks all clarifying questions upfront, iterates until fully resolved, then produces a written specification in /memories/session/plan.md before any implementation proceeds.'
+description: 'ALWAYS invoke at the start of the planning phase before any plan or implementation begins. Auto-suggest for: complex features, architectural changes, new pages or services, cross-cutting concerns, anything spanning multiple files or systems, any request where intent is ambiguous or scope is unclear. Runs a structured alignment interview — acknowledges what is asked, investigates the codebase proportionally, prefers AskQuestion multiple-choice rounds with multi-layer iteration until gaps close, then produces a written specification in /memories/session/plan.md before any implementation proceeds.'
 ---
 
 # clarify-requirements
@@ -64,11 +64,19 @@ Surface only findings that directly affect the questions or decisions ahead.
 
 ---
 
-### Step 3 — Ask All Clarifying Questions Upfront
+### Step 3 — Clarifying Questions (AskQuestion preferred)
 
-Present **all** questions as a single numbered list. Do not ask one at a time — give the full list in one response so the user can answer everything efficiently.
+When `AskQuestion` is available, use it for clarifying questions — **prefer over chat numbered lists**.
 
-Cover every area relevant to this specific request. Skip areas that are clearly not applicable (e.g., skip UI/UX questions for a pure backend task). Always consider:
+- **~5 questions per round**, grouped by theme (functional, scope, technical, edge cases, etc.)
+- Offer **concrete multiple-choice options** inferred from codebase and context — not bare Yes/No
+- Every question includes **"Other / I'll explain in chat"**
+- Use `allow_multiple: true` for checklist-style scope questions
+- Do not re-ask what Step 2 or an existing repo spec already resolved
+
+For trivial tasks (rename, typo), abbreviated mode: 1–2 `AskQuestion` calls or brief chat is OK.
+
+Use the following as an **agent-only coverage guide** when building rounds — do not present this list to the user. Skip areas that are clearly not applicable (e.g., skip UI/UX for a pure backend task). Always consider:
 
 1. **Functional requirements** — What exactly must this feature/change do? Inputs, outputs, and behaviours?
 2. **UI/UX expectations** *(if applicable)* — How should it look and feel? Layouts, interactions, feedback, animations, states (loading, empty, error)?
@@ -100,11 +108,14 @@ When the change touches an **unfamiliar or performance-critical niche**, also co
 
 ### Step 4 — Iterate Until Everything Is Resolved
 
-After the user answers, review their responses:
+After each `AskQuestion` round (or chat answer), review responses:
 
-- If new ambiguities have surfaced, present a follow-up numbered list with only the remaining or new questions.
-- If everything is clear, proceed to Step 5.
-- Repeat as many times as needed — there is no limit.
+1. **Synthesize** — brief bullets of decisions taken from answers
+2. **Gap check** — did answers introduce new ambiguities or conflicts? Cross-check the Step 3 concern checklist
+3. **Follow-up** — only unresolved or newly surfaced gaps; reference prior answers in question text and option labels
+4. **Confirm** — before Step 5, confirm nothing remains (via `AskQuestion` when available)
+
+Repeat until no new gaps from the gap check **and** the user confirms ready. Then proceed to Step 5.
 
 Do NOT proceed to Step 5 with any unresolved questions, unstated assumptions, or vague areas that could lead to misalignment.
 
@@ -155,4 +166,7 @@ Then present the specification to the user in chat and **wait for explicit appro
 - **NEVER** write code, suggest implementation details, or draft a plan until Step 5 is complete and the user has explicitly approved.
 - **NEVER** make silent assumptions. If an assumption is necessary, state it explicitly and ask for confirmation.
 - **NEVER** skip this workflow because the request seems simple. Even simple requests benefit from explicit scope confirmation.
+- **Prefer `AskQuestion` with concrete options** over numbered chat lists when the tool is available.
+- **NEVER** ask follow-ups that ignore prior answers.
+- **NEVER** proceed to Step 5 without synthesizing all rounds into the spec.
 - If the user tries to skip this process, acknowledge their preference, note the risks, and proceed only if they explicitly confirm they want to bypass alignment.
