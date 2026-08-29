@@ -1,199 +1,118 @@
 ---
 name: learn
-description: 'Capture, update, and organize durable knowledge as agent skills for reuse across sessions. Use when: recording project architecture decisions, saving framework quirks or non-obvious behaviors, preserving debugging findings, capturing coding conventions and patterns, reducing repeated explanations, building context for future agents. Also invoke when: a mistake was corrected by the user, a concept had to be explained more than once, a non-obvious workaround was discovered, or an established pattern was confirmed. DO NOT write any file without explicit user approval.'
+description: 'Capture durable knowledge as agent skills. Use when: architecture decisions, conventions, debugging findings, repeated explanations, user corrections, confirmed patterns. Always generalize to principles — never incident-only facts. DO NOT write any file without explicit user approval.'
 ---
 
-# learn — Agent Long-Term Knowledge System
+# learn — Long-Term Knowledge
 
-## Purpose
+Curated skills for future agents with no prior context. `/memories/` = transient session state; learn outputs = permanent, discoverable knowledge.
 
-This skill captures curated, durable knowledge as agent skill files so future agents — and agents whose context window has been compacted — can load relevant knowledge on demand without requiring the user to repeat themselves. It is the long-term memory layer of the system.
+## Triggers
 
-**Relationship to `/memories/`**:
-- `/memories/` → transient working notes, session state, in-progress task context. Session-scoped or short-lived.
-- Learn skill outputs → durable, discoverable knowledge intended for future agents with no prior context.
+- **Manual**: `/learn`
+- **Mandatory on user correction** — run correction pipeline (below) before moving on
+- **Proactive** (approval still required): non-obvious quirk, explained concept, confirmed pattern, repeated topic, debugging finding
 
-When something moves from a working note to an established fact worth reusing across sessions → Learn it.
+## Correction → Learn pipeline
 
----
+On any user correction:
 
-## Trigger Conditions
-
-**Manual**: User invokes `/learn` explicitly to capture something specific.
-
-**Proactive (agent-initiated, approval still required)**: Propose capturing knowledge when any of the following occurs during a session:
-- The user corrected the agent's assumption or approach
-- The agent had to reason through something non-obvious (framework quirk, undocumented behavior, workaround)
-- The user explained a project-specific concept or architecture decision
-- A pattern, convention, or constraint was established or confirmed
-- The same topic has come up more than once across the conversation
-- A debugging finding revealed something worth remembering
-
-> **Important**: Proactive proposals must still go through the approval workflow. Never write anything without explicit approval.
-
----
+1. **Name the principle** in chat — which general rule was violated?
+2. **Check** [principle-catalog](./references/principle-catalog.md) and existing skills — already covered?
+3. **Sweep** codebase for the same anti-pattern; fix or flag
+4. **Propose** learn update — principle first, incident as optional example only
 
 ## Procedure
 
-### Step 1 — Identify What to Capture
+### 1 — Identify
 
-Clearly articulate:
-- What was learned (the fact, pattern, quirk, decision, or finding)
-- Why it is worth capturing (what problem it solves or context gap it fills)
-- Whether it is specific to the current project or broadly applicable
+Articulate: principle (not incident), why it matters, project vs global scope.
 
-### Step 2 — Lookup First (Always)
+### 1.5 — Principle extraction (mandatory)
 
-Before proposing anything, check existing skills in both locations:
+Before lookup or drafting:
 
-**Global skills** (applies across all projects):
+- State the **general principle first**; incident is optional illustration only
+- **Reject** proposals that restate the mistake or name a symbol without a transferable rule
+- **Test**: would this guide an agent on a *similar but not identical* problem?
+- **Tag** a [catalog](./references/principle-catalog.md) category
+- **Persist principle only** — incident details stay in chat/approval preview, never in skill files
 
-| Tool | Paths |
+| Reject if the draft… | Capture instead… |
 |---|---|
-| Cursor | `~/.cursor/skills/`, `~/.agents/skills/` |
-| GitHub Copilot | `~/.copilot/skills/` |
+| Names a symbol, file, method, or one-off fix | Category + transferable rule (role names OK: "scratch buffer", "accumulator") |
+| Only says what not to do | What to do, when it applies, how to discover the right pattern |
+| Needs the original bug story to make sense | Stands alone for a cold-start agent |
+| Paraphrases one correction narrowly | Generalizes to the whole class of similar work |
 
-**Project skills** (for current workspace):
+**Extraction ladder** (run mentally on every draft): incident → category → principle. Only the bottom row gets written.
 
-| Tool | Paths |
-|---|---|
-| Cursor | `<workspace-root>/.cursor/skills/`, `<workspace-root>/.agents/skills/` |
-| GitHub Copilot | `<workspace-root>/.github/skills/` |
+### 2 — Lookup first
 
-Use `list_dir` to enumerate folders, then read the `description` field of each `SKILL.md` to find candidates.
+Enumerate skills in `~/.cursor/skills/`, `~/.agents/skills/`, `~/.copilot/skills/`, and project `.cursor/skills/`, `.agents/skills/`, `.github/skills/`. Read `description` fields. **Update existing** skill if domain matches; create new only when none fits.
 
-**Rule**: If a relevant domain skill already exists → propose updating it (add to body, add a reference file, expand a section). Only propose creating a new skill folder if no existing domain covers the topic.
+### 3 — Scope
 
-### Step 3 — Determine Scope
+| Scope | Path | When |
+|---|---|---|
+| Global (Cursor) | `~/.cursor/skills/<domain>/` or `~/.agents/skills/<domain>/` | Cross-project |
+| Global (Copilot) | `~/.copilot/skills/<domain>/` | Cross-project |
+| Project | `<workspace>/.cursor/skills/<domain>/` etc. | Codebase-specific |
 
-| Scope | Location | Use When |
-|-------|----------|----------|
-| **Global (Cursor)** | `~/.cursor/skills/<domain>/` or `~/.agents/skills/<domain>/` | Framework knowledge, language patterns, tool usage — applicable across multiple projects |
-| **Global (Copilot)** | `~/.copilot/skills/<domain>/` | Same as above, for GitHub Copilot |
-| **Project (Cursor)** | `<workspace-root>/.cursor/skills/<domain>/` or `<workspace-root>/.agents/skills/<domain>/` | Current project architecture, conventions, flows unique to this codebase |
-| **Project (Copilot)** | `<workspace-root>/.github/skills/<domain>/` | Same as above, for GitHub Copilot |
+Prefer **project** when in doubt.
 
-If in doubt, prefer **project scope** — it avoids polluting global knowledge with context that only makes sense for one project.
+### 4 — New or update?
 
-### Step 4 — Decide: New Skill or Update Existing?
+**Update** (preferred): merge into existing principle bullet — never add a parallel bullet restating the same idea. Consolidate overlaps.
 
-**Update existing** (preferred): Add knowledge to an existing domain skill. Options:
-- Add bullet points to an existing section in `SKILL.md`
-- Add a new reference file at `references/<subtopic>.md` and link it from `SKILL.md`
-- Expand the `Gotchas & Edge Cases` section with a new finding
-- Add a cross-reference to a related skill
+**Create new**: only when no domain covers it. Folder name = broad domain (`dotnet-patterns`), not a fact (`reconnection-fix`).
 
-**Create new skill**: Only when no existing domain covers the topic. The new folder name must be lowercase-hyphenated and represent the domain broadly (not the specific fact). See naming conventions below.
+### 5 — Draft
 
-### Step 5 — Draft the Content
+- Updates: exact lines and location
+- New: full `SKILL.md` from template below
+- Structure: **principle + optional example** — forbid example-only learnings
+- Must be generalizable on first read and actionable without the original bug context
 
-Prepare the exact content to be written:
-- For updates: the specific lines to add and exactly where
-- For new skills: the complete `SKILL.md` using the template below
-- Content must be specific, actionable, and non-vague — no filler, no hand-waving
+### 6 — Approval (mandatory)
 
-### Step 6 — Ask for Approval (Mandatory)
+`AskQuestion`: action, path, content preview, Approve/Reject + edits. Never write without explicit approval.
 
-**Never write any file without explicit user approval.**
+### 7 — Write
 
-Use `AskQuestion` to present:
-1. **Action**: "Create new skill `<name>`" or "Update existing skill `<name>`"
-2. **Location**: Full file path
-3. **Content Preview**: The exact content to be written (full text for new files; exact diff/addition for updates)
-4. Provide at minimum: Approve / Reject options, plus a free-text field for modifications
+Create or update on approval. Reference files at `references/<subtopic>.md`.
 
-Only proceed after the user explicitly approves. If they provide edits in the free-text field, incorporate the changes and confirm before writing.
+### 8 — Gap scan
 
-### Step 7 — Write the File
+Propose ≤2–3 more captures from the session; apply principle extraction to each.
 
-On approval, create or update the file using the appropriate tool. For new skills, create the folder and `SKILL.md`. For reference sub-files, create at `references/<subtopic>.md` within the domain skill folder.
-
-### Step 8 — Proactive Gap Scan
-
-After completing the learn action, briefly reflect:
-- Are there other things from this session that aren't captured and should be?
-- Is anything in the current task context that would reduce future repeated explanations?
-
-If yes, propose them (following the same approval workflow). Do not flood the user — propose at most 2-3 items at a time.
-
----
-
-## Generated Skill Template
-
-Use this template for all new knowledge skills created by this workflow:
+## New skill template
 
 ```markdown
 ---
-name: <domain-name>
-description: 'Use when: <specific trigger phrases — what situation warrants loading this skill>. Covers: <list of main topics this skill addresses>.'
+name: <domain>
+description: 'Use when: <triggers>. Covers: <topics>.'
 ---
-
-# <Domain Name>
-
+# <Domain>
 ## Overview
-<2–4 sentences describing what this domain covers, why it matters, and when it is relevant.>
-
 ## Key Patterns
-- <Core fact, rule, or pattern #1>
-- <Core fact, rule, or pattern #2>
-- ...
-
 ## Sub-topics
-- [<Sub-topic Title>](./references/<subtopic>.md) — <one-line description of what this reference covers>
-
 ## Gotchas & Edge Cases
-- <Non-obvious issue, unexpected behavior, or common mistake #1>
-- <Non-obvious issue, unexpected behavior, or common mistake #2>
-
 ## Cross-references
-- Related: `<other-domain-skill-name>` — <why it is related and when to load both>
 ```
 
-**Rules for content quality**:
-- Every bullet must be specific and actionable — never write "ensure proper error handling" or similar vague guidance
-- Include concrete examples, method names, property names, or code snippets where relevant
-- Gotchas must describe the actual failure mode and the correct approach
-- Cross-references must name a real existing skill and explain the relationship
+**Content rules**: specific and actionable; gotchas = failure mode + correct approach; cross-refs name real skills.
 
----
+## Naming
 
-## Domain Naming Conventions
+Lowercase-hyphenated; domain/framework level. Examples: `csharp-async`, `projectname-architecture`. Avoid: `misc`, `my-notes`, `todo`.
 
-| Convention | Details |
-|------------|---------|
-| Format | Lowercase, hyphen-separated |
-| Granularity | Domain/framework/layer level — not per-fact |
-| Scope prefix | For project skills: prefix with project name if ambiguity possible, e.g. `projectname-architecture` |
+## Memory boundary
 
-**Global examples**: `maui-navigation`, `signalr-hubs`, `dotnet-patterns`, `maui-controls`, `csharp-async`
+| System | Lifetime |
+|---|---|
+| `/memories/session/` | Current session |
+| `/memories/repo/` | Informal persistent |
+| Learn outputs | Permanent, indexed by description |
 
-**Project examples**: `projectname-architecture`, `projectname-data-models`, `projectname-game-flow`, `projectname-server-hubs`
-
-**Anti-patterns**: `reconnection-fix`, `my-notes`, `misc`, `todo` — too narrow or non-descriptive
-
----
-
-## Memory System Boundary
-
-| System | What Goes Here | Lifetime |
-|--------|---------------|----------|
-| `/memories/session/` | In-progress task notes, current plan, temporary context (Cursor) | Current session only |
-| `/memories/repo/` | Quick project facts, build commands, local conventions not worth a full skill (Cursor) | Persistent but informal |
-| `/memories/` (user) | Cross-workspace preferences and patterns (Cursor) | Persistent |
-| **Learn skill outputs** | Curated, structured knowledge for future agent discovery | Permanent, indexed by skill description |
-
-If something is genuinely reusable by a future agent starting cold — it belongs in a knowledge skill, not just memory.
-
-> `/memories/` is a Cursor-specific feature. Teams using other agents may use repo-local equivalents (e.g. `docs/notes/`) at the user's direction.
-
----
-
-## Approval Is Always Required
-
-There are no exceptions to the approval requirement. This applies to:
-- Creating a new skill folder and SKILL.md
-- Adding content to an existing skill's SKILL.md
-- Creating a new reference file within an existing skill
-- Reorganizing, renaming, or deleting any skill file
-
-Always use `AskQuestion` and wait for an explicit approval response before writing.
+Reusable by a cold-start agent → learn it, don't just memory-note it.

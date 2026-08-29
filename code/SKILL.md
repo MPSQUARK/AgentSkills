@@ -2,69 +2,75 @@
 name: code
 description: >-
   Use when: writing or modifying code; refactoring; implementing features;
-  user invokes /code. Enforces senior-level SOLID, DRY, and Uncle Bob Clean
-  Code — guard clauses, SRP, no duplication, production-review quality.
+  user invokes /code. Senior SOLID/DRY/Clean Code — discovery-first, correctness
+  before performance, production quality. Gate: run code-review before done.
 disable-model-invocation: true
 ---
 
-# Senior Code Quality (SOLID, DRY, Clean Code)
+# Senior Code Quality
 
-Produce code a senior engineer would approve in production review.
+Produce code a senior engineer approves in production review. After implementation → run `code-review` self-review gate before marking done.
+
+## Discover before you write
+
+0. Read **tests** for similar code — behavior, edge cases, threading assumptions
+1. Grep keywords (cache, scratch, buffer, accumulate, reduce, …)
+2. Read 2–3 implementations in the **same niche** (layer + execution context)
+3. Match **sibling APIs** — naming, errors, symmetry
+4. State what you reuse vs why new code is justified
+
+Before scratch buffers, caches, allocators, accumulators, or new types — check how this niche already handles them. Fix or flag the same mistake elsewhere; don't replicate it.
+
+**Session regression**: if category X was corrected this session, grep for X before submitting new code ([principle catalog](../learn/references/principle-catalog.md)).
+
+## Quality ordering
+
+`Correctness → execution-context fit → structure/reuse → performance`
+
+No benchmarking until correctness is established. Perf that adds shared mutable state or precision loss is a regression.
 
 ## Think first
-- Brief plan: responsibilities, abstractions, boundaries — then code.
-- Stepdown rule: top of file/method reads as a narrative; details descend below.
-- Prefer small composable units over monolithic functions/classes.
+
+- Plan responsibilities, abstractions, boundaries — then code
+- Stepdown: file/method reads as narrative; details below
+- Small composable units over monoliths
 
 ## Fit the execution niche
 
-- Code for one runtime context (UI thread, request handler, batch job, device/accelerator, hot loop) is not interchangeable — identify the niche **before** choosing structure.
-- Read how the **same niche** is already implemented in the codebase (2–3 examples) before introducing new abstractions.
-- The natural unit of work in that niche drives the design — do not serialize work the runtime is meant to parallelize; do not parallelize work that is inherently sequential.
-- Precompute what the hot path should not re-derive on every invocation; pass simple values or structs inward instead of pushing configuration into the inner loop.
+Identify niche (UI thread, request handler, batch, device, hot loop) before structure. Read same-niche code; don't import idioms from a different niche. Match natural unit of work — don't serialize parallelizable work or parallelize sequential work.
+
+## Authoring principles
+
+| Principle | Rule |
+|---|---|
+| Immutable by default | Shared mutable state needs established pattern + justification |
+| Invariants explicit | Document threading, ownership, aliasing, reentrancy where non-obvious |
+| Validate at boundaries | Parse/validate at edges; trust typed values in hot paths |
+| Fail fast | Clear errors at boundary — no silent coercion or swallowed exceptions |
+| Illegal states unrepresentable | Types encode constraints, not boolean flags + sentinels |
+| One error model per layer | Match siblings — don't invent a third style |
+| YAGNI | No speculative hooks/factories unless `code-review` names a near-term need |
+| Behavioral equivalence | Refactors preserve semantics; behavior changes are explicit + tested |
 
 ## Structure
-- SOLID: one responsibility per function/class; ~20–30 lines max unless justified.
-- One abstraction level per function — don't mix orchestration with low-level details.
-- Names reveal intent and are searchable — never `data`, `d`, `stuff`, `handleThing`.
-- One word per concept across the codebase (`Get` vs `Fetch` for the same idea — pick one).
-- DRY: extract on second use; centralize shared behavior (helpers, value objects, static renderers).
-- Named constants over magic numbers/strings (`MaxRetryCount`, `ThemeTokens.Primary`, not bare literals).
-- Max nesting depth 3; replace long if/else with named helpers, maps, or strategy objects.
-- **Avoid the `else` keyword** — use guard clauses and early `return`/`continue` so the happy path stays flat and left-aligned.
-- Orchestrator methods delegate (`Draw` → `DrawNodes` → `GetNodeStyle`); they don't implement everything.
-- Command-query separation: methods either change state OR return a value — not both.
-- Prefer ≤2 parameters; no boolean flag arguments (use separate methods or an options object).
-- Law of Demeter: don't chain through strangers (`a.GetB().GetC().Do()` — encapsulate or inject).
-- Minimize side effects; callers should know what state changes.
 
-## When modifying code (Boy Scout Rule)
-- Leave code cleaner than you found it.
-- Read surrounding code; match existing conventions.
-- Refactor nearby structure if a patch would add duplication or hacks.
-- Remove dead properties/code; don't layer workarounds on redundant state.
-- Prefer enriching the canonical model over parallel DTOs.
-- Extract try/catch — don't blend error handling with business logic.
-- Prefer the **smallest** structure that solves the problem; extra layers need explicit justification.
-- If the change touches an unfamiliar niche (concurrency, device code, serialization, real-time paths), read that niche's project docs and existing implementations — do not infer from a different niche's idioms alone.
+- SOLID; ~20–30 lines per function unless justified; one abstraction level per function
+- Searchable names; one word per concept; DRY — discover first, extract on second use
+- Named constants; max nesting 3; guard clauses over `else`; orchestrators delegate
+- CQRS; ≤2 params; no boolean flags; Law of Demeter; minimal side effects
 
-## Red flags — refactor before submitting
-- Copy-pasted blocks or scattered low-level primitives (inline canvas/API calls vs shared `Renderer`)
-- Functions mixing unrelated concerns (layout + styling + drawing + hit-testing in one method)
-- Duplicate state that already exists on a model
-- Long parameter lists, flag booleans, or train-wreck chains
-- `else` branches where a guard clause + early return would flatten the method
-- Large files with no section structure
-- Clever/condensed code over readable code
-- Comments explaining *what* code does (rename/refactor instead)
-- Orchestration or dispatch layer is larger or more abstract than the work it performs
-- New abstraction for a one-off, or one that duplicates an existing pattern instead of reusing it
-- Duplicate code paths for the same operation (e.g. separate in-place stack when aliasing the allocating path would suffice)
-- Validation, test harnesses, or tooling added to directories the user treats as manual or scratch space
-- Solution works but would embarrass a specialist in that niche (performance library, real-time system, public API surface, etc.)
+## When modifying (Boy Scout)
+
+Leave cleaner than found. Match conventions. Refactor if patch adds duplication. Remove dead code. Enrich canonical model over parallel DTOs. Extract try/catch from business logic. Smallest structure that works. Unfamiliar niche → read its docs and implementations first.
+
+## Red flags — fix before submitting
+
+**Structure**: copy-paste; mixed concerns; duplicate state; long params/flag booleans; train-wrecks; large unstructured files; clever over readable; comments explaining *what*; orchestration bigger than work; one-off abstraction duplicating existing pattern; duplicate code paths; embarrasses a domain specialist
+
+**Agent anti-patterns**: happy-path-only; partial refactor (signature changed, call sites not); inconsistent sibling API; stringly-typed where types exist; speculative abstraction; silent failure (`catch {}`, default on error); fighting the type system (casts/`any`/null-forgiving); scratch/cache/accumulator without checking niche patterns
+
+**Process**: validation/tooling in user's scratch dirs
 
 ## Output
-- Plan → clean code → short decision summary.
-- Ask when ambiguous; don't guess.
 
-Comments only for non-obvious *why*, warnings, or constraints — not narration.
+Plan → clean code → short decision summary. Ask when ambiguous. Comments only for non-obvious *why*, warnings, constraints.

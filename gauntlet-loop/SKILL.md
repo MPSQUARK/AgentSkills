@@ -34,11 +34,12 @@ Popularized by Matt Shumer's [Claude of Duty](https://github.com/mshumer/Claude-
 | `design-document-discovery` | **Pre-flight** when domain/system truth is missing — run before interview or reference its spec |
 | `clarify-requirements` | **Per-piece scoping** when a decomposed chunk is a discrete feature with acceptance criteria |
 | `frontend-design` | **Visual/UI pieces** — design system, aesthetic bar, reference interpretation for critics |
-| `code` | **All builder implementation** — builders must follow `code` skill rules |
+| `code` | **All builder implementation** — follow `code` rules |
+| `code-review` | **Builder gate** — self-review + similar-code sweep before critic handoff; **critic rubric** — systemic pass + principle catalog, adjacency, 2–4 moves ahead |
 | `loop` | **Per-piece iteration** — `/loop` on each independently judgeable unit |
 | `canvas` | **Visual A/B comparison** when critics need side-by-side artifact review |
 | `review-security` / `review-bugbot` | **Optional critics** for security or correctness gates on software pieces |
-| `learn` | **Post-run** — capture durable patterns only with user approval |
+| `learn` | **Post-run** — principle extraction on agreed critic findings; user approval required |
 
 **Order for greenfield ambitious work:** `design-document-discovery` (if needed) → `gauntlet-loop` → routed skills during execution.
 
@@ -176,9 +177,9 @@ Refine decomposition; update Piece Registry in the spec.
 
 For each piece (parallel only when genuinely independent):
 
-1. **Builder** — `Task` subagent (`generalPurpose`; `explore` for research). Follow `code` (+ `frontend-design` if UI). Produce observable artifact.
+1. **Builder** — `Task` subagent (`generalPurpose`; `explore` for research). Follow `code` (+ `frontend-design` if UI). Pass `code-review` self-review (incl. similar-code sweep). Produce observable artifact.
 2. **Verify** — run real checks (tests, build, screenshot, browser snapshot via MCP if web UI).
-3. **Critic** — separate `Task` subagent, **fresh context**. Prompt: objective snippet, bar, metrics, artifact paths, evidence only — **not** builder reasoning. Return: `PASS | FAIL | BLOCKED`, largest gap, fix target, evidence.
+3. **Critic** — separate `Task` subagent, **fresh context**. Use `code-review` systemic pass + [principle catalog](../learn/references/principle-catalog.md). Prompt: objective snippet, bar, metrics, artifact paths, evidence only — **not** builder reasoning. Score reuse, adjacency, 2–4 moves ahead. Return: `PASS | FAIL | BLOCKED`, largest gap, fix target, evidence.
 4. **FAIL** → feed gap to builder; increment rounds; check boundaries.
 5. **PASS** → mark piece done; continue.
 

@@ -82,17 +82,17 @@ Use the following as an **agent-only coverage guide** when building rounds — d
 2. **UI/UX expectations** *(if applicable)* — How should it look and feel? Layouts, interactions, feedback, animations, states (loading, empty, error)?
 3. **Out-of-scope boundaries** — What should explicitly NOT be built or changed? What are the edges of this work?
 4. **Technical approach** — Constraints on architecture, patterns, libraries, or frameworks? Should it follow an existing pattern in the codebase?
-5. **Edge cases and error handling** — What happens in failure scenarios, unexpected inputs, or boundary conditions?
-6. **Acceptance criteria** — How will we know this is done? What does success look like?
-7. **Any vague points detected** — Flag anything ambiguous, underspecified, or open to multiple interpretations.
+5. **Edge cases and failure modes** — Empty, zero, overflow, cancellation, errors — or explicitly N/A with reason
+6. **Quality bar** — Correctness approach, execution context (e.g. multithreaded), invariants, error model, performance constraints
+7. **Reuse expectations** — Existing patterns/APIs to leverage; forbidden duplication
+8. **Acceptance criteria** — How will we know this is done? What does success look like?
+9. **Any vague points detected** — Flag anything ambiguous, underspecified, or open to multiple interpretations.
 
 When the request involves non-trivial design or implementation decisions, also consider:
 
-8. **Design decisions & patterns** — Does this follow SRP? Which pattern fits best (MVVM, service layer, repository, etc.)? Should this be a new service/component or extend an existing one?
-9. **Code reuse** — Are there existing components, helpers, or services that should be leveraged? Does this change create a proactive refactoring opportunity worth raising?
-10. **Consequences of design choices** — What side effects does the proposed approach have on other components? What becomes harder to change later?
-11. **Performance concerns** — Any risk of N+1 queries, UI-thread blocking, memory leaks, or excessive allocation?
-12. **Gaps, ambiguities, and edge cases** — What happens in error or boundary conditions? Are there behaviours left underspecified that could cause misalignment during implementation?
+10. **Design decisions & patterns** — Does this follow SRP? Which pattern fits best (MVVM, service layer, repository, etc.)? Should this be a new service/component or extend an existing one?
+11. **Consequences of design choices** — What side effects does the proposed approach have on other components? What becomes harder to change later?
+12. **Performance concerns** — Any risk of N+1 queries, UI-thread blocking, memory leaks, or excessive allocation?
 
 When the change touches an **unfamiliar or performance-critical niche**, also consider:
 
@@ -147,8 +147,14 @@ Only when **all** questions are fully resolved, write a structured specification
 ## Technical Approach
 [Architecture decisions, patterns to follow, libraries to use, constraints.]
 
-## Edge Cases & Error Handling
-[How the system behaves under failure or boundary conditions.]
+## Quality Bar
+[Correctness approach, execution context, invariants/contracts, error model, performance constraints.]
+
+## Reuse Expectations
+[Patterns/APIs/files to reuse; forbidden duplication; discovery from Step 2.]
+
+## Edge Cases & Failure Modes
+[Explicit list or "inherits from sibling X". Mark N/A only with reason.]
 
 ## Acceptance Criteria
 [Numbered list of conditions that must be true for this to be considered done.]

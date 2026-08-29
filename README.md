@@ -4,21 +4,39 @@ Repository of AI agent skills for structured discovery, alignment, and implement
 
 ## Install
 
-**Cursor** (global):
-
-- `~/.cursor/skills/`
-- `~/.agents/skills/`
-- Windows: `C:\Users\<user>\.cursor\skills` or `C:\Users\<user>\.agents\skills`
+**Cursor** (global): `~/.cursor/skills/`, `~/.agents/skills/` — Windows: `C:\Users\<user>\.cursor\skills` or `C:\Users\<user>\.agents\skills`
 
 **GitHub Copilot** (global): `~/.copilot/skills/`
 
-Copy or symlink skill folders into the appropriate directory for your agent.
+Copy or symlink skill folders into the appropriate directory.
 
-## Skill workflow
+## Workflow
 
-- **`design-document-discovery`** — domain/system specs via repo-wide discovery and vision-vs-code alignment
-- **`clarify-requirements`** — feature-scoped plans before implementation (`/memories/session/plan.md` in Cursor)
-- **`gauntlet-loop`** — ambitious artifacts via builder + critic loops (`/gauntlet-loop`; spec at `/memories/session/gauntlet-loop.md`)
-- **`code`**, **`frontend-design`**, **`learn`** — implementation quality, UI/UX, and durable knowledge capture
+```mermaid
+flowchart LR
+    plan[clarify_requirements] --> code[code]
+    code --> review[code_review]
+    review -->|user_corrects| learn[learn]
+    learn --> catalog[principle_catalog]
+    catalog --> code
+    learn --> code
+```
 
-Run domain discovery first for a new area; use clarify-requirements for each feature against that spec. Use gauntlet-loop when the goal is ambitious, has an inspectable quality bar, and benefits from sustained build–criticize–improve iteration.
+**Feature**: `clarify-requirements` → `code` → `code-review` → done
+
+**Correction**: fix → name principle → codebase sweep → `learn` proposal → `principle-catalog` update
+
+**Ambitious**: `design-document-discovery` (if needed) → `gauntlet-loop` (builders + critics use `code-review`)
+
+## Skills
+
+| Skill | Role |
+|---|---|
+| `design-document-discovery` | Domain/system specs, vision-vs-code alignment |
+| `clarify-requirements` | Feature plans (`/memories/session/plan.md`) with quality bar + reuse |
+| `gauntlet-loop` | Builder + critic loops for ambitious artifacts |
+| `code` | Authoring standards — discovery-first, correctness before perf |
+| `code-review` | Mandatory self-review gate; `/code-review` for deep review |
+| `frontend-design` | UI/UX |
+| `learn` | Durable principles (generalized, user-approved) |
+| `learn/references/principle-catalog.md` | Shared category prompts for learn + code-review |
