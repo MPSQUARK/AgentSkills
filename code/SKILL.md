@@ -34,6 +34,7 @@ No benchmarking until correctness is established. Perf that adds shared mutable 
 - Plan responsibilities, abstractions, boundaries — then code
 - Stepdown: file/method reads as narrative; details below
 - Small composable units over monoliths
+- For pivot discipline, root-cause fixes, and implicit quality bars, see `agent-reasoning`
 
 ## Fit the execution niche
 
